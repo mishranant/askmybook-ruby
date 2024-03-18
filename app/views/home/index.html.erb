@@ -1,0 +1,109 @@
+<%# <% block content %>
+
+<div class="header">
+  <div class="logo">
+    <a href="https://www.amazon.com/Minimalist-Entrepreneur-Great-Founders-More/dp/0593192397">
+      <%= image_tag('book.png', loading: 'lazy') %>
+    </a>
+    <h1>Ask My Book</h1>
+  </div>
+</div>
+
+<div class="main">
+  <%= form_with url: ask_path, method: :post do |form| %>
+    <textarea name="question" id="question"> <%= @default_question %></textarea>
+
+    <div class="buttons" <% if @answer %>style="display: none"<% end %>>
+      <%= form.button "Ask question", type: "submit", id: "ask-button" %>
+      <button id="lucky-button" style="background: #eee; border-color: #eee; color: #444;" data>I'm feeling lucky</button>
+    </div>
+  <% end %>
+
+  <% if @answer %>
+    <p id="answer-container" class="hidden showing"><strong>Answer:</strong> <span id="answer"><%= @answer %></span> <button id="ask-another-button" style="display: block;">Ask another question</button></p>
+  <% else %>
+    <p id="answer-container" class="hidden"><strong>Answer:</strong> <span id="answer"></span> <button id="ask-another-button" style="display: none;">Ask another question</button></p>
+  <% end %>
+</div>
+
+<script>
+  $(document).ready(function() {
+    function randomInteger(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    var showText = function(target, message, index) {
+      if (index < message.length) {
+        var interval = randomInteger(30, 70);
+        $(target).append(message[index++]);
+        setTimeout(function () { showText(target, message, index); }, interval);
+      } else {
+        history.pushState({}, null, "/question/" + window.newQuestionId);
+        $("#ask-another-button").css("display", "block");
+      }
+    }
+
+    $("#lucky-button").click(function(e) {
+      var options = ["What is a minimalist entrepreneur?", "What is your definition of community?", "How do I decide what kind of business I should start?"],
+          random = ~~(Math.random() * options.length);
+
+      $("textarea").val(options[random]);
+    });
+
+    $("textarea").bind('input propertychange', function(e) {
+      $(".buttons").show();
+      document.getElementById('answer-container').classList.remove("showing");
+      clearTimeout(window.answerShower);
+      $("#ask-another-button").css("display", "none");
+    });
+
+    $("#ask-another-button").click(function(e) {
+      $(".buttons").show();
+      document.getElementById('answer-container').classList.remove("showing");
+      clearTimeout(window.answerShower);
+      $("#ask-another-button").css("display", "none");
+      $("textarea").select();
+    });
+
+    $("form").submit(function(e) {
+      if (document.getElementById("question").value == "") {
+        alert("Please ask a question!");
+        e.preventDefault();
+        return false;
+      }
+
+      let askButton = document.getElementById("ask-button");
+      askButton.textContent = "Asking...";
+      askButton.disabled = true;
+
+      $.ajax({
+        type: 'POST',
+        url: '/ask',
+        data: $("form").serialize(),
+        datatype: "json",
+        encode: true
+      }).done(function(data) {
+        $(".buttons").hide();
+
+        var answer = document.getElementById('answer');
+        answer.innerHTML = "";
+        document.getElementById('answer-container').classList.add("showing");
+
+        showText("#answer", data.answer, 0);
+
+        askButton.textContent = "Ask question";
+        askButton.disabled = false;
+
+        window.newQuestionId = data.id;
+      });
+
+      e.preventDefault();
+      return false;
+    });
+  });
+</script>
+
+<footer>
+  <p class="credits">Adapted by <a href="https://twitter.com/_anant_mishra">Anant Mishra</a> • <a href="https://github.com/mishranant/askmybook-ruby">Fork on GitHub</a></a></p>
+  <p class="credits">Inspired by <a href="https://twitter.com/shl">Sahil Lavingia</a> • <a href="https://github.com/shl/askmybook">Source code</a></a></p>
+</footer>
