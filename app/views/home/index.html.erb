@@ -11,7 +11,7 @@
 
 <div class="main">
   <%= form_with url: ask_path, method: :post do |form| %>
-    <textarea name="question" id="question"> <%= @default_question %></textarea>
+    <textarea name="question" id="question"><%= @default_question %></textarea>
 
     <div class="buttons" <% if @answer %>style="display: none"<% end %>>
       <%= form.button "Ask question", type: "submit", id: "ask-button" %>
