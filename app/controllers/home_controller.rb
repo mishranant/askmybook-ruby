@@ -29,7 +29,7 @@ class HomeController < ApplicationController
       end
     end
 
-    @question = Question.new(question:, **AnswerService.new(question).call)
+    @question = Question.new(question:, **AnswerService.new(question).getAnswer)
     respond_to do |format|
       if @question.save
         format.json { render json: { answer: @question.answer, id: @question.id } }
