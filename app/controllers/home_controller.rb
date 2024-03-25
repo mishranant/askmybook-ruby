@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class HomeController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:ask]
-  before_action :set_default_question, only: [:index, :question]
+  before_action :set_default_question, only: %i[index question]
 
   def index; end
 
@@ -17,25 +19,11 @@ class HomeController < ApplicationController
     prev_question = Question.find_by(question:)
 
     if prev_question
-      puts "previously asked and answered: #{prev_question.answer}"
-      prev_question.ask_count += 1
-      respond_to do |format|
-        if prev_question.save
-          format.json { render json: { question: prev_question.question, answer: prev_question.answer, id: prev_question.id } }
-        else
-          format.json { render json: @question.errors, status: :unprocessable_entity }
-        end
-        return
-      end
-    end
-
-    @question = Question.new(question:, **AnswerService.new(question).getAnswer)
-    respond_to do |format|
-      if @question.save
-        format.json { render json: { answer: @question.answer, id: @question.id } }
-      else
-        format.json { render json: @question.errors, status: :unprocessable_entity }
-      end
+      puts "This question has been asked before, this is the answer:\n#{prev_question.answer}"
+      prev_question.increment!(:ask_count)
+      render json: { question: prev_question.question, answer: prev_question.answer, id: prev_question.id }
+    else
+      create_and_render_new_question(question)
     end
   end
 
@@ -43,6 +31,16 @@ class HomeController < ApplicationController
 
   def set_default_question
     @default_question = 'What is The Minimalist Entrepreneur about?'
+  end
+
+  def create_and_render_new_question(question)
+    answer_service = AnswerService.new(question)
+    @question = Question.new(question:, **answer_service.generate_answer)
+    if @question.save
+      render json: { answer: @question.answer, id: @question.id }
+    else
+      render json: @question.errors, status: :unprocessable_entity
+    end
   end
 end
 # TODO: implement other endpoints?

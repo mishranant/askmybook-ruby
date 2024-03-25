@@ -4,13 +4,11 @@
     <title>AskMyBook</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Ask My Book: The Minimalist Entrepreneur</title>
-    <link rel="shortcut icon" href="{% static 'favicon.svg' %}"/>
+    <%= favicon_link_tag 'favicon.ico' %>
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:site" content="@shl"/>
     <meta name="og:title" content="Ask My Book: The Minimalist Entrepreneur"/>
     <meta name="og:description" content="Ask questions of my book, get answers in my voice, powered by AI"/>
-    <meta name="og:image" content="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static 'social.png' %}"/>
-    <meta name="twitter:image:src" content="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static 'social.png' %}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <style type="text/css">
@@ -183,8 +181,3 @@
     <%= yield %>
   </body>
 </html>
-
-<%# {% load static %} %>
-
-
-<%# {% block content %}{% endblock %} %>
